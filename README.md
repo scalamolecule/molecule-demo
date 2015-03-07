@@ -17,23 +17,23 @@ Clone this repo and play around:
 
 Try and add a new attribute to your schema:
 
-  1. In IDE: add `val salary = oneDouble` to the `schema/DemoDefinition` trait
+  1. In IDE: add `val salary = oneDouble` to the `schema/YourDomainDefinition` trait
   2. In terminal: `sbt compile`
   2. Update some code with the new attribute - copy this if you like:
   
-      ```
-      // Load data
-      val johnId = Person.name("John").age(26).gender("male").salary(100000.00).add.id
+```scala
+// Load data
+val johnId = Person.name("John").age(26).gender("male").salary(100000.00).add.id
 
-	  // Retrieve data
-	  val (person, age, gender, salary) = Person.name.age.gender.salary.get.head
+// Retrieve data
+val (person, age, gender, salary) = Person.name.age.gender.salary.get.head
 
-	  // Verify
-	  assert(
-	    s"$person is $age years old, $gender and earns $salary a year" == 
-	    "John is 26 years old, male and earns 100000 a year"
-	  )
-      ```
+// Verify
+assert(
+s"$person is $age years old, $gender and earns $salary a year" ==
+"John is 26 years old, male and earns 100000 a year"
+)
+```
       
 Add more attributes and play around with queries...
 
@@ -44,7 +44,7 @@ In the [project build file]() you can see what you need to add to your own proje
 in order to use Molecule. The Molecule dependency itself is
 
 ```scala
-"org.scalamolecule" % "molecule_2.11.0" % "0.2.1"
+"org.scalamolecule" %% "molecule" % "0.2.1"
 ```
 
 But you'll also need the Boilerplate trait in your build so that you can tell Molecule 
