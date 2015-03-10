@@ -26,7 +26,7 @@ object MoleculeDemoBuild extends Build with Boilerplate {
 
   lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.yourcompany",
-    version := "0.2.2",
+    version := "0.2.3-SNAPSHOT",
     scalaVersion := "2.11.6",
     scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
     resolvers ++= Seq(
