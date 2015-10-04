@@ -1,15 +1,14 @@
 import java.io.File
+
 import sbt._
 
-
 // Generate molecule dsl from definition files
-
 
 object MoleculeBoilerplate {
 
   // Definition AST .......................................
 
-  case class Definition(pkg: String, imports: Seq[String], in: Int, out: Int, domain: String, nss: Seq[Namespace]) {
+  case class Definition(pkg: String, imports: Seq[String], in: Int, out: Int, domain: String, curPart: String, nss: Seq[Namespace]) {
     def addAttr(attr: Attr) = {
       val previousNs = nss.init
       val lastNs = nss.last
@@ -17,7 +16,7 @@ object MoleculeBoilerplate {
     }
   }
 
-  case class Namespace(ns: String, opt: Option[Extension] = None, attrs: Seq[Attr] = Seq())
+  case class Namespace(part: String, ns: String, opt: Option[Extension] = None, attrs: Seq[Attr] = Seq())
 
   sealed trait Extension
 
@@ -37,9 +36,9 @@ object MoleculeBoilerplate {
 
   // Helpers ..........................................
 
-  def padS(longest: Int, str: String) = pad(longest, str.length)
-  def pad(longest: Int, shorter: Int) = if (longest > shorter) " " * (longest - shorter) else ""
-  def firstLow(str: Any) = str.toString.head.toLower + str.toString.tail
+  private def padS(longest: Int, str: String) = pad(longest, str.length)
+  private def pad(longest: Int, shorter: Int) = if (longest > shorter) " " * (longest - shorter) else ""
+  private def firstLow(str: Any) = str.toString.head.toLower + str.toString.tail
   implicit class Regex(sc: StringContext) {
     def r = new scala.util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
   }
@@ -47,7 +46,7 @@ object MoleculeBoilerplate {
 
   // Parse ..........................................
 
-  def parse(defFile: File) = {
+  private def parse(defFile: File, allIndexed: Boolean) = {
     val raw = IO.readLines(defFile) filterNot (_.isEmpty) map (_.trim)
 
     // Check package statement
@@ -60,8 +59,8 @@ object MoleculeBoilerplate {
     // Check input/output arities
     val (inArity, outArity) = raw collect {
       case r"@InOut\((\d+)$in, (\d+)$out\)" => (in.toString.toInt, out.toString.toInt) match {
-        case (i: Int, _) if i < 0 || i > 3  => sys.error(s"Input arity in '${defFile.getName}' was $in. It should be between 0-3")
-        case (_, o: Int) if o < 1 || o > 22 => sys.error(s"Output arity of '${defFile.getName}' was $out. It should be between 1-22")
+        case (i: Int, _) if i < 0 || i > 3  => sys.error(s"Input arity in '${defFile.getName}' was $in. It should be in the range 0-3")
+        case (_, o: Int) if o < 1 || o > 22 => sys.error(s"Output arity of '${defFile.getName}' was $out. It should be in the range 1-22")
         case (i: Int, o: Int)               => (i, o)
       }
     } match {
@@ -78,30 +77,34 @@ object MoleculeBoilerplate {
 
     // Check domain name
     val domain = raw collect {
-      case r"trait (.*)${name}Definition"      => name
-      case r"trait (.*)${name}Definition \{"   => name
-      case r"trait (.*)${name}Definition \{\}" => name
+      case r"object (.*)${name}Definition"      => name
+      case r"object (.*)${name}Definition \{"   => name
+      case r"object (.*)${name}Definition \{\}" => name
     } match {
-      case Nil                      => sys.error("Couldn't find definition trait <domain>Definition in " + defFile.getName)
-      case l: List[_] if l.size > 1 => sys.error(s"Only one definition trait per definition file allowed. Found ${l.size}:" + l.mkString("\n - ", "Definition\n - ", "Definition"))
+      case Nil                      => sys.error("Couldn't find definition object <domain>Definition in " + defFile.getName)
+      case l: List[_] if l.size > 1 => sys.error(s"Only one definition object per definition file allowed. Found ${l.size}:" + l.mkString("\n - ", "Definition\n - ", "Definition"))
       case domainNameList           => firstLow(domainNameList.head)
     }
 
 
-    def parseOptions(str: String, acc: Seq[Optional] = Seq()): Seq[Optional] = str match {
-      case r"\.doc\((.*)$msg\)(.*)$str" => parseOptions(str, acc :+ Optional( s"""":db/doc"               , $msg""", ""))
-      case r"\.fullTextSearch(.*)$str"  => parseOptions(str, acc :+ Optional( """":db/fulltext"          , true.asInstanceOf[Object]""", "FulltextSearch[Ns, In]"))
-      case r"\.uniqueValue(.*)$str"     => parseOptions(str, acc :+ Optional( """":db/unique"            , ":db.unique/value"""", "UniqueValue"))
-      case r"\.uniqueIdentity(.*)$str"  => parseOptions(str, acc :+ Optional( """":db/unique"            , ":db.unique/identity"""", "UniqueIdentity"))
-      case r"\.indexed(.*)$str"         => parseOptions(str, acc :+ Optional( """":db/index"             , true.asInstanceOf[Object]""", "Indexed"))
-      case r"\.subComponents(.*)$str"   => parseOptions(str, acc :+ Optional( """":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
-      case r"\.subComponent(.*)$str"    => parseOptions(str, acc :+ Optional( """":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
-      case r"\.noHistory(.*)$str"       => parseOptions(str, acc :+ Optional( """":db/noHistory"         , true.asInstanceOf[Object]""", "NoHistory"))
-      case ""                           => acc
-      case unexpected                   => sys.error(s"Unexpected options code in ${defFile.getName}:\n" + unexpected)
+    def parseOptions(str: String, acc: Seq[Optional] = Seq()): Seq[Optional] = {
+      val indexed = Optional( """":db/index"             , true.asInstanceOf[Object]""", "Indexed")
+      val options = str match {
+        case r"\.doc\((.*)$msg\)(.*)$str" => parseOptions(str, acc :+ Optional( s"""":db/doc"               , $msg""", ""))
+        case r"\.fullTextSearch(.*)$str"  => parseOptions(str, acc :+ Optional( """":db/fulltext"          , true.asInstanceOf[Object]""", "FulltextSearch[Ns, In]"))
+        case r"\.uniqueValue(.*)$str"     => parseOptions(str, acc :+ Optional( """":db/unique"            , ":db.unique/value"""", "UniqueValue"))
+        case r"\.uniqueIdentity(.*)$str"  => parseOptions(str, acc :+ Optional( """":db/unique"            , ":db.unique/identity"""", "UniqueIdentity"))
+        case r"\.subComponents(.*)$str"   => parseOptions(str, acc :+ Optional( """":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
+        case r"\.subComponent(.*)$str"    => parseOptions(str, acc :+ Optional( """":db/isComponent"       , true.asInstanceOf[Object]""", "IsComponent"))
+        case r"\.noHistory(.*)$str"       => parseOptions(str, acc :+ Optional( """":db/noHistory"         , true.asInstanceOf[Object]""", "NoHistory"))
+        case r"\.indexed(.*)$str"         => parseOptions(str, acc :+ indexed)
+        case ""                           => acc
+        case unexpected                   => sys.error(s"Unexpected options code in ${defFile.getName}:\n" + unexpected)
+      }
+      if (allIndexed) (options :+ indexed).distinct else options
     }
 
-    def parseAttr(attr: String, attrClean: String, str: String) = str match {
+    def parseAttr(attr: String, attrClean: String, str: String, curPart: String) = str match {
       case r"oneString(.*)$str"  => Val(attr, attrClean, "OneString", "String", "", "string", parseOptions(str))
       case r"oneByte(.*)$str"    => Val(attr, attrClean, "OneByte", "Byte", "", "byte", parseOptions(str))
       case r"oneShort(.*)$str"   => Val(attr, attrClean, "OneShort", "Short", "", "short", parseOptions(str))
@@ -127,20 +130,33 @@ object MoleculeBoilerplate {
       case r"oneEnum\((.*)$enums\)"  => Enum(attr, attrClean, "OneEnum", "String", "", enums.replaceAll("'", "").split(",").toList.map(_.trim))
       case r"manyEnum\((.*)$enums\)" => Enum(attr, attrClean, "ManyEnums", "Set[String]", "String", enums.replaceAll("'", "").split(",").toList.map(_.trim))
 
-      case r"one\[(.*)$ref\](.*)$str"  => Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", ref)
-      case r"many\[(.*)$ref\](.*)$str" => Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", ref)
-      case unexpected                  => sys.error(s"Unexpected attribute code in ${defFile.getName}:\n" + unexpected)
+      case r"one\[\w*Definition\.([a-z].*)$partref\](.*)$str"  => Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", partref.replace(".", "_"))
+      case r"one\[([a-z].*)$partref\](.*)$str"                 => Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", partref.replace(".", "_"))
+      case r"one\[(.*)$ref\](.*)$str" if curPart.isEmpty       => Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", ref)
+      case r"one\[(.*)$ref\](.*)$str"                          => Ref(attr, attrClean, "OneRefAttr", "OneRef", "Long", "", curPart + "_" + ref)
+      case r"many\[\w*Definition\.([a-z].*)$partref\](.*)$str" => Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", partref.replace(".", "_"))
+      case r"many\[([a-z].*)$partref\](.*)$str"                => Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", partref.replace(".", "_"))
+      case r"many\[(.*)$ref\](.*)$str" if curPart.isEmpty      => Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", ref)
+      case r"many\[(.*)$ref\](.*)$str"                         => Ref(attr, attrClean, "ManyRefAttr", "ManyRef", "Set[Long]", "Long", curPart + "_" + ref)
+      case unexpected                                          => sys.error(s"Unexpected attribute code in ${defFile.getName}:\n" + unexpected)
     }
 
-    val definition: Definition = raw.foldLeft(Definition("", Seq(), -1, -1, "", Seq())) {
+    val definition: Definition = raw.foldLeft(Definition("", Seq(), -1, -1, "", "", Seq())) {
       case (d, line) => line match {
         case r"\/\/.*" /* comments allowed */                 => d
         case r"package (.*)$path\.[\w]*"                      => d.copy(pkg = path)
         case "import molecule.dsl.schemaDefinition._"         => d
         case r"@InOut\((\d+)$inS, (\d+)$outS\)"               => d.copy(in = inS.toString.toInt, out = outS.toString.toInt)
-        case r"trait (.*)${dmn}Definition \{"                 => d.copy(domain = dmn)
-        case r"trait (\w*)$ns\s*\{"                           => d.copy(nss = d.nss :+ Namespace(ns))
-        case r"val\s*(\`?)$q1(\w*)$a(\`?)$q2\s*\=\s*(.*)$str" => d.addAttr(parseAttr(q1 + a + q2, a, str))
+        case r"object (.*)${dmn}Definition \{"                => d.copy(domain = dmn)
+        case r"object ([a-z]*)$part\s*\{"                     => d.copy(curPart = part)
+        case r"object (\w*)$part\s*\{"                        => sys.error(s"Unexpected partition name '$part' in ${defFile.getName}. Only small letters (a-z) allowed in a partition name.")
+        case r"trait ([A-Z]\w*)$ns\s*\{"                      => {
+          val partns = if (d.curPart.isEmpty) ns else d.curPart + "_" + ns
+          // prepend partition to its namespaces
+          d.copy(nss = d.nss :+ Namespace(d.curPart, partns))
+        }
+        case r"trait (\w*)$ns\s*\{"                           => sys.error(s"Unexpected namespace name '$ns' in ${defFile.getName}. Namespaces have to start with a capital letter [A-Z].")
+        case r"val\s*(\`?)$q1(\w*)$a(\`?)$q2\s*\=\s*(.*)$str" => d.addAttr(parseAttr(q1 + a + q2, a, str, d.curPart))
         case "}"                                              => d
         case unexpected                                       => sys.error(s"Unexpected definition code in ${defFile.getName}:\n" + unexpected)
       }
@@ -151,7 +167,7 @@ object MoleculeBoilerplate {
 
   def resolve(definition: Definition) = {
 
-    val newNss1 = definition.nss.foldLeft(definition.nss) { case (nss2, ns) =>
+    val newNss1 = definition.nss.foldLeft(definition.nss) {case (nss2, ns) =>
       // Gather OneRefs (ManyRefs are treated as nested data structures)
       val refs1 = ns.attrs.collect {
         case ref@Ref(_, refAttr, clazz, _, _, _, refNs) => refNs -> ref
@@ -159,11 +175,14 @@ object MoleculeBoilerplate {
 
       // Add BackRefs
       nss2.map {
-        case ns2 if refs1.size > 1 && refs1.keys.toList.contains(ns2.ns) =>
-          val attrs2 = refs1.filter(_._1 != ns2.ns).foldLeft(ns2.attrs) { case (attrs, ref) =>
+        case ns2 if refs1.nonEmpty && refs1.keys.toList.contains(ns2.ns) =>
+          val attrs2 = refs1.foldLeft(ns2.attrs) {case (attrs, ref) =>
             val Ref(_, refAttr, clazz, _, tpe, _, _) = ref._2
-            val backRef = BackRef(s"_${ns.ns}", ns.ns, "BackRefAttr", "BackRef", tpe, "", "")
-            attrs :+ backRef
+            val cleanNs = if (ns.ns.contains('_')) ns.ns.split("_").tail.head else ns.ns
+            val backRef = BackRef(s"_$cleanNs", ns.ns, "BackRefAttr", "BackRef", tpe, "", "") // todo: check not to backreference same-named namespaces in different partitions
+            //            val backRef = BackRef(s"_${ns.ns}", ns.ns, "BackRefAttr", "BackRef", tpe, "", "")
+            // Exclude self-references (?)
+            if (ns.ns == ns2.ns) attrs else attrs :+ backRef
           }.distinct
           ns2.copy(attrs = attrs2)
         case ns2                                                         => ns2
@@ -195,16 +214,36 @@ object MoleculeBoilerplate {
       s"Util.map(${all.mkString(",\n             ")})"
     }
 
-    def enums(ns: String, a: String, es: Seq[String]) = es.map(e =>
-      s"""Util.map(":db/id", Peer.tempid(":db.part/user"), ":db/ident", ":${firstLow(ns)}.$a/$e")""").mkString(",\n    ")
+    def enums(part: String, ns: String, a: String, es: Seq[String]) = {
+      val partition = if (part.isEmpty) ":db.part/user" else s":$part"
+      es.map(e =>
+        s"""Util.map(":db/id", Peer.tempid("$partition"), ":db/ident", ":${firstLow(ns)}.$a/$e")""").mkString(",\n    ")
+      //            s"""Util.map(":db/id", Peer.tempid(":db.part/$part"), ":db/ident", ":${firstLow(ns)}.$a/$e")""").mkString(",\n    ")
+    }
 
-    val stmts = d.nss map { ns =>
+    val partitions = {
+      val ps = d.nss.map(_.part).filter(_.nonEmpty).distinct.map {p =>
+        s"""|Util.map(":db/ident"             , ":$p",
+            |             ":db/id"                , Peer.tempid(":db.part/db"),
+            |             ":db.install/_partition", ":db.part/db")""".stripMargin
+      }
+      if (ps.nonEmpty) {
+        s"""|
+            |  lazy val partitions = Util.list(
+            |
+            |    ${ps.mkString(",\n\n    ")}
+            |  )
+            |""".stripMargin
+      } else "\n  lazy val partitions = Util.list()\n"
+    }
+
+    val stmts = d.nss map {ns =>
       val exts = ns.opt.getOrElse("").toString
       val header = "\n    // " + ns.ns + exts + " " + ("-" * (65 - (ns.ns.length + exts.length)))
-      val attrs = ns.attrs.flatMap { a =>
+      val attrs = ns.attrs.flatMap {a =>
         val attr = attrStmts(ns.ns, a)
         a match {
-          case e: Enum     => Seq(attr, enums(ns.ns, a.attrClean, e.enums))
+          case e: Enum     => Seq(attr, enums(ns.part, ns.ns, a.attrClean, e.enums))
           case br: BackRef => Nil
           case _           => Seq(attr)
         }
@@ -223,8 +262,8 @@ object MoleculeBoilerplate {
         |import datomic.{Util, Peer}
         |
         |object ${d.domain}Schema extends Transaction {
-        |
-        |  lazy val tx = Util.list(
+        |  $partitions
+        |  lazy val namespaces = Util.list(
         |    ${stmts.mkString(",\n    ")}
         |  )
         |}""".stripMargin
@@ -281,29 +320,34 @@ object MoleculeBoilerplate {
 
         val p1 = padS(maxAttr, attr)
         val p2 = padS(maxAttr, attrClean)
-        Some((s"val $attr  $p1: $attr$p1[$nextNS, $nextIn] with $nextNS = ???",
-          s"val ${attrClean}_ $p2: $attr$p1[$thisNS, $thisIn] with $thisNS = ???"))
+        val t1 = s"$attr$p1[$nextNS, $nextIn] with $nextNS"
+        val xx = a match {
+          case valueAttr: Val if in == 0 && out == 0 => s"""lazy val $attr  $p1: $t1 = new $t1 { override val _kw = ":${firstLow(ns)}/$attr" }"""
+          case enumAttr: Enum if in == 0 && out == 0 => s"""lazy val $attr  $p1: $t1 = new $t1 { override val _kw = ":${firstLow(ns)}/$attr" }"""
+          case _                                     => s"""lazy val $attr  $p1: $t1 = ???"""
+        }
+        Some((xx, s"lazy val ${attrClean}_ $p2: $attr$p1[$thisNS, $thisIn] with $thisNS = ???"))
     }.unzip
 
     val (maxClazz2, maxRefNs, maxNs) = attrs.map {
       case Ref(_, _, _, clazz2, _, _, refNs)       => (clazz2.length, refNs.length, 0)
       case BackRef(_, clazz2, _, _, _, _, backRef) => (clazz2.length, backRef.length, ns.length)
-      case other => (0, 0, 0)
+      case other                                   => (0, 0, 0)
     }.unzip3
 
     val refCode = attrs.foldLeft(Seq("")) {
-      case (acc, Ref(attr, _, _, clazz2, _, _, refNs)) => {
+      case (acc, Ref(attr, _, _, clazz2, _, _, refNs))      => {
         val p1 = padS(maxAttr, attr)
         val p2 = padS("ManyRef".length, clazz2)
         val p3 = padS(maxRefNs.max, refNs)
         val ref = (in, out) match {
-          case (0, 0) => s"${refNs}_0$p3"
-          case (0, o) => s"${refNs}_$o$p3[${OutTypes mkString ", "}]"
-          case (i, o) => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]"
+          case (0, 0)                => s"${refNs}_0$p3 with Nested0[${refNs}_0$p3, ${refNs}_1$p3]"
+          case (0, o) if o == maxOut => s"${refNs}_$o$p3[${OutTypes mkString ", "}]"
+          case (0, o)                => s"${refNs}_$o$p3[${OutTypes mkString ", "}] with Nested$o[${refNs}_$o$p3, ${refNs}_${o + 1}$p3, ${OutTypes mkString ", "}]"
+          case (i, o)                => s"${refNs}_In_${i}_$o$p3[${(InTypes ++ OutTypes) mkString ", "}]"
         }
         acc :+ s"def ${attr.capitalize} $p1 : $clazz2$p2[$ns, $refNs$p3] with $ref = ???"
       }
-
       case (acc, BackRef(backAttr, backRef, _, _, _, _, _)) =>
         val p1 = padS(maxAttr, backAttr)
         val p2 = padS(maxClazz2.max, backRef)
@@ -313,8 +357,7 @@ object MoleculeBoilerplate {
           case (i, o) => s"${backRef}_In_${i}_$o$p2[${(InTypes ++ OutTypes) mkString ", "}]"
         }
         acc :+ s"def $backAttr $p1 : $ref = ???"
-
-      case (acc, _) => acc
+      case (acc, _)                                         => acc
     }.distinct
 
     val optional = option match {
@@ -354,12 +397,12 @@ object MoleculeBoilerplate {
         val (thisIn, nextIn) = if (maxIn == 0 || in == maxIn) ("P" + (out + in + 1), "P" + (out + in + 2)) else (s"${ns}_In_${i + 1}_0", s"${ns}_In_${i + 1}_1")
         val types = InTypes mkString ", "
         s"""
-            |
-            |/********* Input molecules awaiting $i input$s *******************************/
-            |
-            |trait ${ns}_In_${i}_0[$types] extends $ns with In_${i}_0[${ns}_In_${i}_0, ${ns}_In_${i}_1, $thisIn, $nextIn, $types] {
-            |  ${(attrVals ++ Seq("") ++ attrVals_ ++ refCode ++ optional).mkString("\n  ").trim}
-            |}
+           |
+           |/********* Input molecules awaiting $i input$s *******************************/
+           |
+           |trait ${ns}_In_${i}_0[$types] extends $ns with In_${i}_0[${ns}_In_${i}_0, ${ns}_In_${i}_1, $thisIn, $nextIn, $types] {
+           |  ${(attrVals ++ Seq("") ++ attrVals_ ++ refCode ++ optional).mkString("\n  ").trim}
+           |}
          """.stripMargin
 
       // Last input trait
@@ -404,7 +447,8 @@ object MoleculeBoilerplate {
 
       case Enum(attr, _, clazz, _, _, enums) =>
         val enumValues = s"private lazy val ${enums.mkString(", ")} = EnumValue "
-        Some(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] { $enumValues }")
+        Some(
+          s"""class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In] { $enumValues }""")
 
       case Ref(attr, _, clazz, _, _, _, _) =>
         Some(s"class $attr${p1(attr)}[Ns, In] extends $clazz${p2(clazz)}[Ns, In]")
@@ -426,34 +470,36 @@ object MoleculeBoilerplate {
     val extraImports = if (extraImports0.isEmpty) "" else extraImports0.mkString(s"\nimport ", "\nimport ", "")
 
     s"""/*
-       |* AUTO-GENERATED CODE - DON'T CHANGE!
-       |*
-       |* Manual changes to this file will likely break molecules!
-       |* Instead, change the molecule definition files and recompile your project with `sbt compile`.
-       |*/
-       |package ${d.pkg}.dsl.${firstLow(d.domain)}
-       |import molecule.dsl.schemaDSL._
-       |import molecule.dsl._$extraImports
-       |
-       |
-       |object $Ns extends ${Ns}_0
-       |
-       |trait $Ns {
-       |  $attrClasses
-       |}
-       |
+        |* AUTO-GENERATED CODE - DON'T CHANGE!
+        |*
+        |* Manual changes to this file will likely break molecules!
+        |* Instead, change the molecule definition file(s) and recompile your project with `sbt compile`.
+        |*/
+        |package ${d.pkg}.dsl.${firstLow(d.domain)}
+        |import molecule.dsl.schemaDSL._
+        |import molecule.dsl._$extraImports
+        |
+        |
+        |object $Ns extends ${Ns}_0 {
+        |  def apply(e: Long): ${Ns}_0 = ???
+        |}
+        |
+        |trait $Ns {
+        |  $attrClasses
+        |}
+        |
        |$nsTraits""".stripMargin
   }
 
-  def generate(srcManaged: File, domainDirs: Seq[String]): Seq[File] = {
+  def generate(srcManaged: File, domainDirs: Seq[String], allIndexed: Boolean = true): Seq[File] = {
     // Loop domain directories
-    val files = domainDirs flatMap { domainDir =>
+    val files = domainDirs flatMap {domainDir =>
       val definitionFiles = sbt.IO.listFiles(new File(domainDir) / "schema").filter(f => f.isFile && f.getName.endsWith("Definition.scala"))
       assert(definitionFiles.size > 0, "Found no definition files in path: " + domainDir)
 
       // Loop definition files in each domain directory
-      definitionFiles flatMap { definitionFile =>
-        val d0 = parse(definitionFile)
+      definitionFiles flatMap {definitionFile =>
+        val d0 = parse(definitionFile, allIndexed)
         val d = resolve(d0)
 
 
@@ -462,7 +508,7 @@ object MoleculeBoilerplate {
         IO.write(schemaFile, schemaBody(d))
 
         // Write namespace files
-        val namespaceFiles = d.nss.map { ns =>
+        val namespaceFiles = d.nss.map {ns =>
           val nsFile: File = d.pkg.split('.').toList.foldLeft(srcManaged)((dir, pkg) => dir / pkg) / "dsl" / firstLow(d.domain) / s"${ns.ns}.scala"
           val nsBody = namespaceBody(d, ns)
           IO.write(nsFile, nsBody)

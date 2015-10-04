@@ -3,7 +3,7 @@ import molecule.dsl.schemaDefinition._
 
 
 @InOut(0, 3)
-trait YourDomainDefinition {
+object YourDomainDefinition {
 
   trait Person {
     val name     = oneString.fullTextSearch
