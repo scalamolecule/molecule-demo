@@ -26,7 +26,7 @@ object MoleculeDemoBuild extends Build with Boilerplate {
 
   lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.yourcompany",
-    version := "0.4.2",
+    version := "0.5.1",
     scalaVersion := "2.11.7",
     scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
     resolvers ++= Seq(
@@ -36,8 +36,8 @@ object MoleculeDemoBuild extends Build with Boilerplate {
       Resolver.sonatypeRepo("snapshots")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.4.2",
-      "com.datomic" % "datomic-free" % "0.9.5327",
+      "org.scalamolecule" %% "molecule" % "0.5.1",
+      "com.datomic" % "datomic-free" % "0.9.5350",
       "com.chuusai" %% "shapeless" % "2.0.0"
     )
   )
