@@ -28,11 +28,9 @@ lazy val moleculeDemo = project.in(file("demo"))
   .settings(commonSettings)
 
   // Add schema definition directories
-  .settings(Seq(
-  moleculeDefinitionDirectories(
+  .settings(Seq(moleculeDefinitionDirectories(
     "demo/src/main/scala/demo"
-  )
-))
+  )))
 
 
 def moleculeDefinitionDirectories(domainDirs: String*) = sourceGenerators in Compile += Def.task[Seq[File]] {

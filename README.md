@@ -52,8 +52,7 @@ in which directories you have schema definition files (using the `moleculeDefini
 
 ```
 // Add schema definition directories
-.settings(Seq(
-moleculeDefinitionDirectories(
-"demo/src/main/scala/demo"
-)
+.settings(Seq(moleculeDefinitionDirectories(
+  "demo/src/main/scala/demo"
+)))
 ```
