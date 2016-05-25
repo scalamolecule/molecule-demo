@@ -40,20 +40,20 @@ Add more attributes and play around with queries...
 
 ### Molecule in your own project
 
-In the [project build file]() you can see what you need to add to your own project
+In the project build file you can see what you need to add to your own project
 in order to use Molecule. The Molecule dependency itself is
 
 ```scala
-"org.scalamolecule" %% "molecule" % "0.5.1"
+"org.scalamolecule" %% "molecule" % "0.6.1"
 ```
 
 But you'll also need the Boilerplate trait in your build so that you can tell Molecule 
 in which directories you have schema definition files (using the `moleculeDefinitionDirectories` method):
 
 ```
-    settings = commonSettings ++ Seq(
-      moleculeDefinitionDirectories(
-        "demo/src/main/scala/demo"
-      )
-    )
+// Add schema definition directories
+.settings(Seq(
+moleculeDefinitionDirectories(
+"demo/src/main/scala/demo"
+)
 ```
