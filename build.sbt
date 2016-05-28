@@ -9,7 +9,8 @@ lazy val commonSettings = Seq(
     "datomic" at "http://files.datomic.com/maven",
     "clojars" at "http://clojars.org/repo",
     Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
+    Resolver.sonatypeRepo("snapshots"),
+    "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
   ),
   libraryDependencies ++= Seq(
     "org.scalamolecule" %% "molecule" % "0.6.1",
