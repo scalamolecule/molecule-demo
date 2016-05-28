@@ -44,7 +44,7 @@ In the project build file you can see what you need to add to your own project
 in order to use Molecule. The Molecule dependency itself is
 
 ```scala
-"org.scalamolecule" %% "molecule" % "0.6.1"
+"org.scalamolecule" %% "molecule" % "0.6.2"
 ```
 
 But you'll also need the Boilerplate trait in your build so that you can tell Molecule 
