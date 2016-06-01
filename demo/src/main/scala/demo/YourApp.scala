@@ -4,6 +4,7 @@ import demo.dsl.yourDomain._
 import demo.schema._
 import molecule._
 
+
 object YourApp extends App with DatomicFacade {
 
   // Make db
@@ -17,5 +18,6 @@ object YourApp extends App with DatomicFacade {
 
   // Verify
   assert(s"$person is a $age years old $gender" == "John is a 26 years old male")
+
   println(s"SUCCESS: $person is a $age years old $gender") //SUCCESS: John is a 26 years old male
 }
