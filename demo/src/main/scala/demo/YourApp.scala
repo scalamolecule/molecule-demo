@@ -8,7 +8,7 @@ import molecule._
 object YourApp extends App with DatomicFacade {
 
   // Make db
-  implicit val conn = load(YourDomainSchema)
+  implicit val conn = recreateDbFrom(YourDomainSchema)
 
   // Load data
   val companyId = Person.name("John").age(26).gender("male").add.eid

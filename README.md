@@ -1,6 +1,6 @@
 # Molecule demo app
 
-####Minimal project setup for using Molecule
+### Tryout a demo of Molecule
 
 _See [Molecule](http://scalamolecule.org) website for more info._
 
@@ -13,9 +13,38 @@ Clone this repo and play around:
 5. Run DemoApp
 
 
+### Molecule in your own project
+
+For sbt 0.13.6+ add sbt-molecule as a dependency in `project/buildinfo.sbt`:
+
+```scala
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.1.0")
+```
+
+Add the following in your `build.sbt`:
+
+```scala
+lazy val yourProject = project.in(file("demo"))
+  .enablePlugins(MoleculePlugin)
+  .settings(
+    resolvers ++= Seq(
+      "datomic" at "http://files.datomic.com/maven",
+      "clojars" at "http://clojars.org/repo",
+      Resolver.sonatypeRepo("releases"),
+      "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
+    ),
+    libraryDependencies ++= Seq(
+      "org.scalamolecule" %% "molecule" % "0.7.0",
+      "com.datomic" % "datomic-free" % "0.9.5359"
+    ),
+    moleculeSchemas := Seq("demo") // paths to your schema definition files...
+  )
+```
+
+
 ### Molecule Schema creation workflow
 
-Try and add a new attribute to your schema:
+Try and add a new attribute to the demo schema:
 
   1. In IDE: add `val salary = oneDouble` to the `schema/YourDomainDefinition` trait
   2. In terminal: `sbt compile`
@@ -37,22 +66,3 @@ s"$person is $age years old, $gender and earns $salary a year" ==
       
 Add more attributes and play around with queries...
 
-
-### Molecule in your own project
-
-In the project build file you can see what you need to add to your own project
-in order to use Molecule. The Molecule dependency itself is
-
-```scala
-"org.scalamolecule" %% "molecule" % "0.6.2"
-```
-
-But you'll also need the Boilerplate trait in your build so that you can tell Molecule 
-in which directories you have schema definition files (using the `moleculeDefinitionDirectories` method):
-
-```
-// Add schema definition directories
-.settings(Seq(definitionDirectories(
-  "demo/src/main/scala/demo"
-)))
-```
