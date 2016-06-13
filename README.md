@@ -34,8 +34,8 @@ lazy val yourProject = project.in(file("demo"))
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.7.0",
-      "com.datomic" % "datomic-free" % "0.9.5359"
+      "org.scalamolecule" %% "molecule" % "0.8.0",
+      "com.datomic" % "datomic-free" % "0.9.5372"
     ),
     moleculeSchemas := Seq("demo") // paths to your schema definition files...
   )

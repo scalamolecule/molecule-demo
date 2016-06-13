@@ -1,6 +1,6 @@
 lazy val commonSettings = Seq(
   organization := "com.yourcompany",
-  version := "0.7.0",
+  version := "0.8.0",
   scalaVersion := "2.11.8",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -11,8 +11,8 @@ lazy val commonSettings = Seq(
     "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
   ),
   libraryDependencies ++= Seq(
-    "org.scalamolecule" %% "molecule" % "0.7.0",
-    "com.datomic" % "datomic-free" % "0.9.5359"
+    "org.scalamolecule" %% "molecule" % "0.8.0",
+    "com.datomic" % "datomic-free" % "0.9.5372"
   )
 )
 
