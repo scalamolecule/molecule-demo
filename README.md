@@ -37,7 +37,7 @@ lazy val yourProject = project.in(file("demo"))
       "org.scalamolecule" %% "molecule" % "0.9.0",
       "com.datomic" % "datomic-free" % "0.9.5404"
     ),
-    moleculeSchemas := Seq("demo") // paths to your schema definition files...
+    moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
 
