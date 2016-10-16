@@ -1,6 +1,8 @@
-lazy val commonSettings = Seq(
+import sbt.Keys._
+
+lazy val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.yourcompany",
-  version := "0.8.0",
+  version := "0.9.0",
   scalaVersion := "2.11.8",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
@@ -11,21 +13,23 @@ lazy val commonSettings = Seq(
     "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
   ),
   libraryDependencies ++= Seq(
-    "org.scalamolecule" %% "molecule" % "0.8.0",
-    "com.datomic" % "datomic-free" % "0.9.5372"
+    "org.scalamolecule" %% "molecule" % "0.9.0",
+    "com.datomic" % "datomic-free" % "0.9.5404"
   )
 )
 
 lazy val demo = project.in(file("."))
-  .aggregate(moleculeDemo)
+  .aggregate(app)
   .settings(commonSettings)
-  .settings(moduleName := "molecule-demo-root")
 
 
-lazy val moleculeDemo = project.in(file("demo"))
+lazy val app = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(commonSettings)
   .settings(
-    moduleName := "molecule-demo",
-    moleculeSchemas := Seq("demo")
+    name := "molecule-demo",
+    version := "1.0",
+    moleculeSchemas := Seq("app"),
+    moleculeSeparateInFiles := false, // Optional to set
+    moleculeAllIndexed := true // Optional to set
   )

@@ -18,7 +18,7 @@ Clone this repo and play around:
 For sbt 0.13.6+ add sbt-molecule as a dependency in `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.1.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.2.0")
 ```
 
 Add the following in your `build.sbt`:
@@ -34,8 +34,8 @@ lazy val yourProject = project.in(file("demo"))
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.8.0",
-      "com.datomic" % "datomic-free" % "0.9.5372"
+      "org.scalamolecule" %% "molecule" % "0.9.0",
+      "com.datomic" % "datomic-free" % "0.9.5404"
     ),
     moleculeSchemas := Seq("demo") // paths to your schema definition files...
   )
@@ -52,7 +52,7 @@ Try and add a new attribute to the demo schema:
   
 ```scala
 // Load data
-val johnId = Person.name("John").age(26).gender("male").salary(100000.00).add.id
+val johnId = Person.name("John").age(26).gender("male").salary(100000.00).save.id
 
 // Retrieve data
 val (person, age, gender, salary) = Person.name.age.gender.salary.get.head
