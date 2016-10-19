@@ -18,7 +18,7 @@ Clone this repo and play around:
 For sbt 0.13.6+ add sbt-molecule as a dependency in `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.2.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.3.0")
 ```
 
 Add the following in your `build.sbt`:
@@ -34,7 +34,7 @@ lazy val yourProject = project.in(file("demo"))
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.9.0",
+      "org.scalamolecule" %% "molecule" % "0.10.0",
       "com.datomic" % "datomic-free" % "0.9.5404"
     ),
     moleculeSchemas := Seq("app") // paths to your schema definition files...
