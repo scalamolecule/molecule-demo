@@ -9,7 +9,7 @@ Clone this repo and play around:
 1. `git clone https://github.com/scalamolecule/molecule-demo.git`
 2. `cd molecule-demo`
 3. `sbt compile`
-4. Open project in your IDE
+4. Open project in your IDE (you might need to refresh the SBT project within the IDE)
 5. Run DemoApp
 
 
