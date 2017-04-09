@@ -15,13 +15,21 @@ Clone this repo and play around:
 
 ### Molecule in your own project
 
-For sbt 0.13.6+ add sbt-molecule as a dependency in `project/buildinfo.sbt`:
+Add the following to your build files: 
+
+`project/build.properties`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.3.0")
+sbt.version=0.13.13
 ```
 
-Add the following in your `build.sbt`:
+`project/buildinfo.sbt`:
+
+```scala
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.3.1")
+```
+
+`build.sbt`:
 
 ```scala
 lazy val yourProject = project.in(file("demo"))
@@ -34,10 +42,10 @@ lazy val yourProject = project.in(file("demo"))
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.10.0",
-      "com.datomic" % "datomic-free" % "0.9.5404"
+      "org.scalamolecule" %% "molecule" % "0.10.1",
+      "com.datomic" % "datomic-free" % "0.9.5561"
     ),
-    moleculeSchemas := Seq("app") // paths to your schema definition files...
+    moleculeSchemas := Seq("demo") // paths to your schema definition files...
   )
 ```
 
@@ -63,6 +71,6 @@ s"$person is $age years old, $gender and earns $salary a year" ==
 "John is 26 years old, male and earns 100000 a year"
 )
 ```
-      
+
 Add more attributes and play around with queries...
 

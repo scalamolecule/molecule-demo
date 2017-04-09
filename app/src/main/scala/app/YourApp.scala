@@ -11,7 +11,8 @@ object YourApp extends App with DatomicFacade {
   implicit val conn = recreateDbFrom(YourDomainSchema)
 
   // Load data
-  val companyId = Person.name("John").age(26).gender("male").save.eid
+  val johnId = Person.name("John").age(26).gender("male").save.eid
+
 
   // Retrieve data
   val (person, age, gender) = Person.name.age.gender.one
