@@ -13,7 +13,6 @@ object YourApp extends App with DatomicFacade {
   // Load data
   val johnId = Person.name("John").age(26).gender("male").save.eid
 
-
   // Retrieve data
   val (person, age, gender) = Person.name.age.gender.one
 
