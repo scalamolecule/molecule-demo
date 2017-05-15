@@ -5,7 +5,7 @@ import app.schema._
 import molecule._
 
 
-object YourApp extends App with DatomicFacade {
+object YourApp extends App {
 
   // Make db
   implicit val conn = recreateDbFrom(YourDomainSchema)
@@ -14,7 +14,7 @@ object YourApp extends App with DatomicFacade {
   val johnId = Person.name("John").age(26).gender("male").save.eid
 
   // Retrieve data
-  val (person, age, gender) = Person.name.age.gender.one
+  val (person, age, gender) = Person.name.age.gender.get.head
 
   // Verify
   assert(s"$person is a $age years old $gender" == "John is a 26 years old male")
