@@ -12,7 +12,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
     Resolver.sonatypeRepo("snapshots")
   ),
   libraryDependencies ++= Seq(
-    "org.scalamolecule" %% "molecule" % "0.13.0",
+    "org.scalamolecule" %% "molecule" % "0.13.1",
     "com.datomic" % "datomic-free" % "0.9.5561.62"
   )
 )
