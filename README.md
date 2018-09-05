@@ -20,13 +20,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=0.13.16
+sbt.version=1.1.2
 ```
 
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.4.5")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.5.0")
 ```
 
 `build.sbt`:
@@ -41,7 +41,7 @@ lazy val yourProject = project.in(file("demo"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.13.2",
+      "org.scalamolecule" %% "molecule" % "0.14.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("demo") // paths to your schema definition files...
@@ -59,7 +59,7 @@ Try and add a new attribute to the demo schema:
   
 ```scala
 // Load data
-val johnId = Person.name("John").age(26).gender("male").salary(100000.00).save.id
+val johnId = Person.name("John").age(26).gender("male").salary(100000.00).save.eid
 
 // Retrieve data
 val (person, age, gender, salary) = Person.name.age.gender.salary.get.head
