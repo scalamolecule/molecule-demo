@@ -2,7 +2,7 @@ package app
 
 import app.dsl.yourDomain._
 import app.schema._
-import molecule.Imports._
+import molecule.api._
 
 object YourApp extends App {
 
