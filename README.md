@@ -20,13 +20,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.1.2
+sbt.version=1.1.6
 ```
 
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.5.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.6.0")
 ```
 
 `build.sbt`:
@@ -41,7 +41,7 @@ lazy val yourProject = project.in(file("demo"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.14.0",
+      "org.scalamolecule" %% "molecule" % "0.15.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("demo") // paths to your schema definition files...
