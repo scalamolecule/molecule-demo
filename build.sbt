@@ -2,7 +2,7 @@ import sbt.Keys._
 
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.yourcompany",
-  version := "0.15.0",
+  version := "0.15.1",
   scalaVersion := "2.12.7",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
