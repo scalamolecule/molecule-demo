@@ -6,8 +6,8 @@ import molecule.schema.definition._
 object YourDomainDefinition {
 
   trait Person {
-    val name     = oneString.fulltextSearch.doc("A Person's name")
-    val age      = oneInt.doc("Age of person")
-    val gender   = oneEnum('male, 'female).doc("Gender of person")
+    val name   = oneString.fulltext.doc("A Person's name")
+    val age    = oneInt.doc("Age of person")
+    val gender = oneEnum('male, 'female).doc("Gender of person")
   }
 }

@@ -2,8 +2,8 @@ import sbt.Keys._
 
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.yourcompany",
-  version := "0.16.1",
-  scalaVersion := "2.12.7",
+  version := "0.17.0",
+  scalaVersion := "2.12.8",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
     "datomic" at "http://files.datomic.com/maven",
@@ -12,7 +12,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
     Resolver.sonatypeRepo("snapshots")
   ),
   libraryDependencies ++= Seq(
-    "org.scalamolecule" %% "molecule" % "0.16.1",
+    "org.scalamolecule" %% "molecule" % "0.17.0",
     "com.datomic" % "datomic-free" % "0.9.5697"
   )
 )
