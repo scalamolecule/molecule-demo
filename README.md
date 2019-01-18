@@ -41,7 +41,7 @@ lazy val yourProject = project.in(file("demo"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.17.0",
+      "org.scalamolecule" %% "molecule" % "0.17.1",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
     moleculeSchemas := Seq("demo") // paths to your schema definition files...
