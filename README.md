@@ -20,19 +20,19 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.1.6
+sbt.version=1.3.2
 ```
 
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.2")
 ```
 
 `build.sbt`:
 
 ```scala
-lazy val yourProject = project.in(file("demo"))
+lazy val yourProject = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(
     resolvers ++= Seq(
@@ -41,12 +41,16 @@ lazy val yourProject = project.in(file("demo"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.18.3",
+      "org.scalamolecule" %% "molecule" % "0.19.0",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
-    moleculeSchemas := Seq("demo") // paths to your schema definition files...
+    moleculeSchemas := Seq("app") // paths to your schema definition files...
   )
 ```
+Molecule 0.19.0 cross-compilations available at maven central for Scala 
+[2.13.1](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/sbt-molecule_2.13.1/) and
+[2.12.10](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/sbt-molecule_2.12.10/).
+
 (You might need to mark the `lib` folder as a library in your IDE so that it recognizes the created boilerplate class/source jars)
 
 ### Molecule Schema creation workflow
