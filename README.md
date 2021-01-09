@@ -44,7 +44,9 @@ lazy val yourProject = project.in(file("app"))
       "org.scalamolecule" %% "molecule" % "0.23.1",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
-    moleculePluginActive := true,
+    
+    // Generate Molecule boilerplate code with `sbt clean compile -Dmolecule=true`
+    moleculePluginActive := sys.props.get("molecule") == Some("true"),
     moleculeDataModelPaths := Seq("app"), // paths to your schema definition files...
     
     // Let IDE detect created jars in unmanaged lib directory
