@@ -4,13 +4,13 @@
 
 _See [Molecule](http://scalamolecule.org) website for more info._
 
-Clone this repo and play around:
+
 
 1. `git clone https://github.com/scalamolecule/molecule-demo.git`
 2. `cd molecule-demo`
 3. `sbt compile`
-4. Open project in your IDE (you might need to refresh the SBT project within the IDE)
-5. Run DemoApp
+4. Open project in your IDE
+5. `sbt test` or test in your IDE
 
 
 ### Molecule in your own project
@@ -20,13 +20,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.3.5
+sbt.version=1.4.6
 ```
 
 `project/buildinfo.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.8.4")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "0.12.0")
 ```
 
 `build.sbt`:
@@ -41,39 +41,17 @@ lazy val yourProject = project.in(file("app"))
       Resolver.sonatypeRepo("releases")
     ),
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule" % "0.21.0",
+      "org.scalamolecule" %% "molecule" % "0.23.1",
       "com.datomic" % "datomic-free" % "0.9.5697"
     ),
-    moleculeSchemas := Seq("app") // paths to your schema definition files...
+    moleculePluginActive := true,
+    moleculeDataModelPaths := Seq("app"), // paths to your schema definition files...
+    
+    // Let IDE detect created jars in unmanaged lib directory
+    exportJars := true
   )
 ```
 Molecule cross-compilations available at maven central for Scala 
 [2.13](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/sbt-molecule_2.13.1/) and
 [2.12](https://oss.sonatype.org/content/repositories/releases/org/scalamolecule/sbt-molecule_2.12.10/).
-
-(You might need to mark the `lib` folder as a library in your IDE so that it recognizes the created boilerplate class/source jars)
-
-### Molecule Schema creation workflow
-
-Try and add a new attribute to the demo schema:
-
-  1. In IDE: add `val salary = oneDouble` to the `schema/YourDomainDefinition` trait
-  2. In terminal: `sbt compile`
-  2. Update some code with the new attribute - copy this if you like:
-  
-```scala
-// Load data
-val johnId = Person.name("John").age(26).gender("male").salary(100000.00).save.eid
-
-// Retrieve data
-val (person, age, gender, salary) = Person.name.age.gender.salary.get.head
-
-// Verify
-assert(
-s"$person is $age years old, $gender and earns $salary a year" ==
-"John is 26 years old, male and earns 100000 a year"
-)
-```
-
-Add more attributes and play around with queries...
 
