@@ -6,10 +6,8 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalaVersion := "2.13.4",
   scalacOptions := Seq("-feature", "-language:implicitConversions", "-Yrangepos"),
   resolvers ++= Seq(
-    ("datomic" at "http://files.datomic.com/maven")
-      .withAllowInsecureProtocol(true),
-    ("clojars" at "http://clojars.org/repo")
-      .withAllowInsecureProtocol(true),
+//    ("datomic" at "http://files.datomic.com/maven").withAllowInsecureProtocol(true),
+    ("clojars" at "http://clojars.org/repo").withAllowInsecureProtocol(true),
   ),
   libraryDependencies ++= Seq(
     "org.scalamolecule" %% "molecule" % "0.23.1",
