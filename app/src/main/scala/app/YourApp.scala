@@ -1,8 +1,8 @@
 package app
 
 import app.dsl.yourDomain._
-import app.schema._
-import molecule.datomic.api.out3._
+import app.schema.YourDomainSchema
+import molecule.datomic.api._
 import molecule.datomic.peer.facade.Datomic_Peer
 
 object YourApp {
